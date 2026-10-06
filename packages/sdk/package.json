@@ -1,0 +1,19 @@
+{
+  "name": "@bug-reporter/sdk",
+  "version": "0.1.0",
+  "description": "Lightweight browser bug reporting widget and telemetry SDK",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "scripts": {
+    "build": "echo 'Build script to be configured in later phase'"
+  },
+  "keywords": [
+    "bug-reporter",
+    "widget",
+    "telemetry",
+    "breadcrumbs",
+    "shadow-dom"
+  ],
+  "author": "",
+  "license": "MIT"
+}

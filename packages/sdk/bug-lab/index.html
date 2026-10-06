@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bug Reporter — Bug Lab Test Harness</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131c31;
+      --border: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #6366f1;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 32px;
+      line-height: 1.5;
+    }
+    h1 { margin: 0 0 8px 0; font-size: 26px; }
+    p.subtitle { color: var(--muted); font-size: 13px; margin: 0 0 24px 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .section-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-top: 0;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    button {
+      background: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button:hover { background: #334155; }
+    button.btn-red { background: #7f1d1d; border-color: #991b1b; color: #fecaca; }
+    button.btn-red:hover { background: #991b1b; }
+    button.btn-blue { background: #1e3a8a; border-color: #1d4ed8; color: #bfdbfe; }
+    button.btn-blue:hover { background: #1d4ed8; }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      background: #0b1120;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: white;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    pre {
+      background: #050811;
+      border: 1px solid #1e293b;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #93c5fd;
+      max-height: 180px;
+      overflow: auto;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      background: #6366f1;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="badge">SDK Failure Lab (bug-lab)</div>
+  <h1>Deliberate Failure Testing Suite</h1>
+  <p class="subtitle">
+    Simulate deliberate errors, network timeouts, unhandled promise rejections, and verify that the SDK isolates all errors without interfering with the host webpage.
+  </p>
+
+  <div class="grid">
+    <!-- 1. Console Interceptions -->
+    <div class="section-card">
+      <h3>1. Console Telemetry Interception</h3>
+      <div class="btn-group">
+        <button class="btn-red" id="lab-console-error">console.error("Syntax fail")</button>
+        <button id="lab-console-warn">console.warn("API deprecated")</button>
+        <button id="lab-console-obj">console.error({ obj: 123, cyclic: true })</button>
+      </div>
+    </div>
+
+    <!-- 2. Unhandled Runtime Exceptions -->
+    <div class="section-card">
+      <h3>2. Unhandled Runtime Exceptions</h3>
+      <div class="btn-group">
+        <button class="btn-red" id="lab-uncaught-throw">Throw Uncaught Exception</button>
+        <button class="btn-red" id="lab-unhandled-rejection">Unhandled Promise Rejection</button>
+      </div>
+    </div>
+
+    <!-- 3. Network & HTTP Telemetry -->
+    <div class="section-card">
+      <h3>3. Network & Fetch Failures</h3>
+      <div class="btn-group">
+        <button class="btn-blue" id="lab-fetch-500">Fetch 500 Server Error</button>
+        <button class="btn-blue" id="lab-fetch-404">Fetch 404 Endpoint</button>
+        <button class="btn-blue" id="lab-xhr-fail">XMLHttpRequest 500 Fail</button>
+      </div>
+    </div>
+
+    <!-- 4. SPA Route Navigation -->
+    <div class="section-card">
+      <h3>4. SPA Route Navigation</h3>
+      <div class="btn-group">
+        <button id="lab-push-state">history.pushState("/cart")</button>
+        <button id="lab-replace-state">history.replaceState("/checkout")</button>
+        <button id="lab-hash-change">location.hash = "#step-2"</button>
+      </div>
+    </div>
+
+    <!-- 5. Sensitive DOM & Privacy Masking -->
+    <div class="section-card">
+      <h3>5. Privacy Masking Verification</h3>
+      <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Password field (auto-masked):</label>
+      <input type="password" value="super_secret_master_key_123" />
+
+      <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Annotated element [data-bug-mask]:</label>
+      <div data-bug-mask="true" style="padding: 8px 12px; background: #1e293b; border-radius: 6px; font-size: 12px; color: #f59e0b; margin-bottom: 8px;">
+        Balance: $84,920.00 USD (Tax ID: 99-8877665)
+      </div>
+    </div>
+
+    <!-- 6. Complex Elements & Picker Test -->
+    <div class="section-card">
+      <h3>6. Element Picker Target</h3>
+      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">
+        Click the bug icon 🐞, select &quot;Select element on page&quot;, and target this component:
+      </p>
+      <div id="target-subscription-widget" style="padding: 12px; border: 2px dashed #6366f1; border-radius: 8px; background: #131c31;">
+        <span style="font-size: 12px; font-weight: bold; color: #818cf8;">Pro Subscription Plan</span>
+        <button class="btn-blue" id="btn-subscribe-action" style="margin-top: 8px; display: block;">Upgrade to Pro ($29/mo)</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="section-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3>Live Ring Buffer Diagnostics (<span id="count-bread">0</span>/40)</h3>
+        <button id="btn-refresh-stores" style="padding: 4px 8px; font-size: 11px;">Refresh Diagnostics</button>
+      </div>
+      <pre id="pre-diagnostics">[]</pre>
+    </div>
+  </div>
+
+  <!-- Load SDK -->
+  <script type="module">
+    import { init, breadcrumbStore, consoleStore, networkStore } from "../src/index.js";
+
+    // Auto-initialize SDK in test lab
+    init({
+      apiKey: "pk_bug_lab_test_key",
+      endpoint: "/api/v1",
+      autoMount: true,
+    });
+
+    function refresh() {
+      const b = breadcrumbStore.getAll();
+      document.getElementById("count-bread").textContent = b.length;
+      document.getElementById("pre-diagnostics").textContent = JSON.stringify(b, null, 2);
+    }
+
+    // 1. Console triggers
+    document.getElementById("lab-console-error").addEventListener("click", () => {
+      console.error("SyntaxError: Unexpected token < in JSON at position 0");
+      refresh();
+    });
+
+    document.getElementById("lab-console-warn").addEventListener("click", () => {
+      console.warn("DeprecationWarning: legacy API will be discontinued in v2.0");
+      refresh();
+    });
+
+    document.getElementById("lab-console-obj").addEventListener("click", () => {
+      const obj = { error: "Payload timeout", code: 504 };
+      obj.self = obj; // cyclic
+      console.error("Cyclic object test:", obj);
+      refresh();
+    });
+
+    // 2. Uncaught exceptions
+    document.getElementById("lab-uncaught-throw").addEventListener("click", () => {
+      setTimeout(() => {
+        throw new Error("Synthetic unhandled exception from host application");
+      }, 0);
+      setTimeout(refresh, 50);
+    });
+
+    document.getElementById("lab-unhandled-rejection").addEventListener("click", () => {
+      Promise.reject(new Error("Synthetic unhandled promise rejection (Database query failed)"));
+      setTimeout(refresh, 50);
+    });
+
+    // 3. Network failures
+    document.getElementById("lab-fetch-500").addEventListener("click", () => {
+      fetch("https://httpbin.org/status/500").catch(() => {}).finally(() => setTimeout(refresh, 200));
+    });
+
+    document.getElementById("lab-fetch-404").addEventListener("click", () => {
+      fetch("https://httpbin.org/status/404").catch(() => {}).finally(() => setTimeout(refresh, 200));
+    });
+
+    document.getElementById("lab-xhr-fail").addEventListener("click", () => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "https://httpbin.org/status/503");
+      xhr.onloadend = () => setTimeout(refresh, 100);
+      xhr.send();
+    });
+
+    // 4. SPA Navigation
+    document.getElementById("lab-push-state").addEventListener("click", () => {
+      window.history.pushState({}, "", "/cart?item=pro-plan");
+      refresh();
+    });
+
+    document.getElementById("lab-replace-state").addEventListener("click", () => {
+      window.history.replaceState({}, "", "/checkout/order-991");
+      refresh();
+    });
+
+    document.getElementById("lab-hash-change").addEventListener("click", () => {
+      window.location.hash = "#step-" + Math.floor(Math.random() * 10);
+      refresh();
+    });
+
+    document.getElementById("btn-refresh-stores").addEventListener("click", refresh);
+
+    setTimeout(refresh, 100);
+  </script>
+</body>
+</html>

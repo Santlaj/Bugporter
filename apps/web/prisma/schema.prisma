@@ -1,0 +1,215 @@
+// Prisma schema for Bug Reporter
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ReportStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  IGNORED
+  DUPLICATE
+}
+
+enum ReportSeverity {
+  P0
+  P1
+  P2
+  P3
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum IntegrationType {
+  GITHUB
+  TELEGRAM
+  EMAIL
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  image         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  organizations Organization[]
+
+  @@map("users")
+}
+
+model Organization {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  ownerId   String
+  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("organizations")
+}
+
+model Project {
+  id                 String              @id @default(cuid())
+  organizationId     String
+  organization       Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name               String
+  slug               String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  origins            ProjectOrigin[]
+  apiKeys            ProjectApiKey[]
+  reports            Report[]
+  integrations       Integration[]
+  githubInstallation GitHubInstallation?
+  notifications      Notification[]
+
+  @@unique([organizationId, slug])
+  @@map("projects")
+}
+
+model ProjectOrigin {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  origin    String
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, origin])
+  @@index([projectId])
+  @@map("project_origins")
+}
+
+model ProjectApiKey {
+  id        String       @id @default(cuid())
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  publicKey String       @unique
+  status    ApiKeyStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  revokedAt DateTime?
+
+  @@index([projectId, status])
+  @@map("project_api_keys")
+}
+
+model Report {
+  id                 String            @id @default(cuid())
+  projectId          String
+  project            Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fingerprint        String
+  title              String
+  description        String            @db.Text
+  status             ReportStatus      @default(OPEN)
+  severity           ReportSeverity    @default(P2)
+  url                String
+  route              String
+  browser            String
+  browserVersion     String
+  os                 String
+  viewportWidth      Int
+  viewportHeight     Int
+  devicePixelRatio   Float
+  userAgent          String?           @db.Text
+  language           String?
+  timezone           String?
+  referrer           String?
+  elementTag         String?
+  elementSelector    String?
+  elementText        String?
+  elementRect        Json?
+  metadata           Json?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  screenshot         ReportScreenshot?
+  events             ReportEvent[]
+  notifications      Notification[]
+
+  @@index([projectId, createdAt(sort: Desc)])
+  @@index([projectId, status])
+  @@index([projectId, fingerprint])
+  @@index([projectId, severity])
+  @@map("reports")
+}
+
+model ReportScreenshot {
+  id        String   @id @default(cuid())
+  reportId  String   @unique
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  provider  String   @default("cloudinary")
+  publicId  String
+  url       String
+  format    String   @default("webp")
+  width     Int
+  height    Int
+  bytes     Int
+  createdAt DateTime @default(now())
+
+  @@map("report_screenshots")
+}
+
+model ReportEvent {
+  id        String   @id @default(cuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  type      String   // "breadcrumb", "console", "network", "error"
+  payload   Json
+  timestamp DateTime @default(now())
+
+  @@index([reportId, type])
+  @@index([reportId, timestamp])
+  @@map("report_events")
+}
+
+model Integration {
+  id        String          @id @default(cuid())
+  projectId String
+  project   Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      IntegrationType
+  config    Json
+  enabled   Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@unique([projectId, type])
+  @@map("integrations")
+}
+
+model GitHubInstallation {
+  id             String   @id @default(cuid())
+  projectId      String   @unique
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  installationId String
+  accountLogin   String
+  targetRepo     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("github_installations")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reportId  String?
+  report    Report?  @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  channel   String   // "TELEGRAM", "EMAIL"
+  status    String   // "PENDING", "SENT", "FAILED"
+  error     String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt(sort: Desc)])
+  @@map("notifications")
+}

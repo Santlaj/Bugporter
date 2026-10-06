@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bug Reporter SDK — Interactive Test Lab</title>
+  <style>
+    /* Deliberate aggressive host styles to verify Shadow DOM style isolation */
+    button.host-custom-btn {
+      font-size: 16px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #090d16;
+      color: #f8fafc;
+      margin: 0;
+      padding: 32px;
+      line-height: 1.6;
+    }
+    .header-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: #4f46e5;
+      color: white;
+      margin-bottom: 12px;
+    }
+    h1 { margin: 0 0 8px 0; font-size: 28px; }
+    p.sub { color: #94a3b8; margin: 0 0 24px 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .card {
+      background: #131c31;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card h3 { margin-top: 0; font-size: 16px; color: #e2e8f0; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s ease;
+    }
+    .btn:hover { background: #334155; color: #fff; }
+    .btn-danger { background: #7f1d1d; border-color: #991b1b; color: #fecaca; }
+    .btn-danger:hover { background: #991b1b; }
+    .btn-primary { background: #6366f1; border-color: #4f46e5; color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+    pre {
+      background: #050811;
+      border: 1px solid #1e293b;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      overflow: auto;
+      max-height: 220px;
+      color: #93c5fd;
+    }
+    .store-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+    .target-box {
+      padding: 16px;
+      border: 2px dashed #475569;
+      border-radius: 8px;
+      margin-top: 16px;
+      background: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-tag">Phase 2 — SDK Widget & Shadow DOM</div>
+  <h1>Bug Reporter Interactive Test Lab</h1>
+  <p class="sub">
+    Look at the bottom right corner for the floating 🐞 button. Try clicking it to open the modal, select elements, and submit a report!
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Host Application Actions</h3>
+      <div class="btn-group">
+        <button class="btn btn-danger" id="btn-console-err">Log Console Error</button>
+        <button class="btn" id="btn-fetch-fail">Fetch 404 Endpoint</button>
+        <button class="btn" id="btn-route-change">Change History Route</button>
+        <button class="btn" id="btn-throw-uncaught">Throw Uncaught Exception</button>
+      </div>
+
+      <div class="target-box" id="test-checkout-box">
+        <h4 style="margin: 0 0 8px 0; color: #cbd5e1;">Sample Interactive Component</h4>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
+          Try using the <strong>"Select element on page"</strong> feature inside the bug modal to target this button.
+        </p>
+        <button class="btn btn-primary host-custom-btn" id="checkout-sample-btn">Pay $49.00 (Checkout)</button>
+        <span style="font-size: 12px; color: #64748b; margin-left: 10px;">ID: #checkout-sample-btn</span>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <h4 style="margin: 0 0 8px 0; color: #cbd5e1;">Sensitive Elements (Auto-masked)</h4>
+        <input type="password" value="secret_password_test" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; width: 220px;" />
+        <span data-bug-mask="true" style="padding: 6px 12px; background: #1e293b; border-radius: 6px; font-size: 12px; color: #f59e0b; margin-left: 8px;">
+          [data-bug-mask: SSN 123-45-6789]
+        </span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Telemetry In-Memory Stores</h3>
+        <button class="btn" id="btn-refresh-telemetry" style="font-size: 11px; padding: 4px 8px;">Refresh</button>
+      </div>
+
+      <div class="store-label">
+        <span>Breadcrumbs (Ring Buffer)</span>
+        <span id="stat-breadcrumbs">0 / 40</span>
+      </div>
+      <pre id="pre-breadcrumbs">[]</pre>
+
+      <div class="store-label">
+        <span>Console Events (Bounded)</span>
+        <span id="stat-console">0 / 100</span>
+      </div>
+      <pre id="pre-console">[]</pre>
+
+      <div class="store-label">
+        <span>Network Telemetry (Bounded)</span>
+        <span id="stat-network">0 / 100</span>
+      </div>
+      <pre id="pre-network">[]</pre>
+
+      <div style="margin-top: 16px;">
+        <button class="btn btn-primary" id="btn-test-screenshot">Test Viewport Screenshot & Privacy Masking</button>
+        <div id="screenshot-preview-container" style="margin-top: 10px; display: none;">
+          <h5 style="margin: 0 0 6px 0; color: #a5b4fc;">Screenshot Result (Masked):</h5>
+          <img id="img-preview" style="max-width: 100%; border: 1px solid #334155; border-radius: 6px;" />
+          <p id="screenshot-meta" style="font-size: 11px; color: #94a3b8; margin-top: 4px;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      init,
+      breadcrumbStore,
+      consoleStore,
+      networkStore,
+      widgetController
+    } from "../src/index.js";
+
+    // Initialize SDK with auto-mount
+    init({
+      apiKey: "pk_test_sample_123",
+      endpoint: "/api/v1",
+      autoMount: true,
+    });
+
+    function updateStoreViews() {
+      const b = breadcrumbStore.getAll();
+      const c = consoleStore.getAll();
+      const n = networkStore.getAll();
+
+      document.getElementById("stat-breadcrumbs").textContent = `${b.length} / 40`;
+      document.getElementById("pre-breadcrumbs").textContent = JSON.stringify(b, null, 2);
+
+      document.getElementById("stat-console").textContent = `${c.length} / 100`;
+      document.getElementById("pre-console").textContent = JSON.stringify(c, null, 2);
+
+      document.getElementById("stat-network").textContent = `${n.length} / 100`;
+      document.getElementById("pre-network").textContent = JSON.stringify(n, null, 2);
+    }
+
+    // Button interactions
+    document.getElementById("btn-console-err").addEventListener("click", () => {
+      console.error("Test console.error from host page at " + new Date().toLocaleTimeString());
+      updateStoreViews();
+    });
+
+    document.getElementById("btn-fetch-fail").addEventListener("click", () => {
+      fetch("https://httpbin.org/status/404").catch(() => {}).finally(() => {
+        setTimeout(updateStoreViews, 300);
+      });
+    });
+
+    document.getElementById("btn-route-change").addEventListener("click", () => {
+      window.history.pushState({}, "", "/checkout/step-" + Math.floor(Math.random() * 5));
+      updateStoreViews();
+    });
+
+    document.getElementById("btn-throw-uncaught").addEventListener("click", () => {
+      setTimeout(() => {
+        throw new Error("Synthetic uncaught error triggered on host page");
+      }, 0);
+      setTimeout(updateStoreViews, 100);
+    });
+
+    document.getElementById("checkout-sample-btn").addEventListener("click", () => {
+      console.warn("Payment button clicked: processing test charge...");
+      updateStoreViews();
+    });
+
+    document.getElementById("btn-refresh-telemetry").addEventListener("click", updateStoreViews);
+
+    // Screenshot manual test
+    document.getElementById("btn-test-screenshot").addEventListener("click", async () => {
+      const btn = document.getElementById("btn-test-screenshot");
+      btn.textContent = "Capturing...";
+      btn.disabled = true;
+
+      try {
+        const { captureScreenshot } = await import("../src/capture/screenshot.capture.js");
+        const result = await captureScreenshot();
+
+        if (result && result.blob) {
+          const previewUrl = URL.createObjectURL(result.blob);
+          const img = document.getElementById("img-preview");
+          img.src = previewUrl;
+          document.getElementById("screenshot-meta").textContent = 
+            `Format: ${result.format.toUpperCase()} | Dimensions: ${result.width}x${result.height} | Size: ${(result.bytes / 1024).toFixed(1)} KB`;
+          document.getElementById("screenshot-preview-container").style.display = "block";
+        } else {
+          alert("Screenshot capture returned null.");
+        }
+      } catch (err) {
+        alert("Error testing screenshot: " + err.message);
+      } finally {
+        btn.textContent = "Test Viewport Screenshot & Privacy Masking";
+        btn.disabled = false;
+      }
+    });
+
+    // Initial render
+    setTimeout(updateStoreViews, 100);
+  </script>
+</body>
+</html>

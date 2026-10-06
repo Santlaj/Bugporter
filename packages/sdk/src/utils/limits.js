@@ -1,0 +1,14 @@
+/**
+ * SDK Limits and Constraints
+ */
+export const LIMITS = {
+  MAX_BREADCRUMBS: 40,
+  MAX_CONSOLE: 100,
+  MAX_NETWORK: 100,
+  MAX_ERRORS: 50,
+  MAX_DESCRIPTION_BYTES: 5 * 1024, // 5 KB
+  MAX_METADATA_BYTES: 20 * 1024, // 20 KB
+  MAX_TEXT_SNIPPET_LENGTH: 100,
+};
+
+export default LIMITS;
