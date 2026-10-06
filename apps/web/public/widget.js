@@ -285,6 +285,19 @@
           var scrollX = window.scrollX || 0;
           var scrollY = window.scrollY || 0;
 
+          // Temporarily hide the widget in the real DOM during snapshot rendering
+          var realHost = document.getElementById("bug-reporter-host");
+          var prevVisibility = realHost ? realHost.style.visibility : "";
+          if (realHost) {
+            realHost.style.visibility = "hidden";
+          }
+
+          function restoreHost() {
+            if (realHost) {
+              realHost.style.visibility = prevVisibility;
+            }
+          }
+
           h2c(document.body, {
             width: width,
             height: height,
@@ -295,8 +308,27 @@
             useCORS: true,
             allowTaint: false,
             logging: false,
+            ignoreElements: function (element) {
+              if (!element) return false;
+              if (element.id === "bug-reporter-host") return true;
+              if (element.getAttribute && element.getAttribute("data-html2canvas-ignore") === "true") return true;
+              if (element.classList && (element.classList.contains("br-picker-overlay") || element.classList.contains("br-picker-box"))) return true;
+              return false;
+            },
             onclone: function (doc) {
-              // Privacy masking on clone
+              // 1. Remove bug reporter widget and overlays from the clone completely
+              try {
+                var brHost = doc.getElementById("bug-reporter-host");
+                if (brHost && brHost.parentNode) {
+                  brHost.parentNode.removeChild(brHost);
+                }
+                var brElements = doc.querySelectorAll("[data-html2canvas-ignore], .br-picker-overlay, .br-picker-box, [id*='bug-reporter']");
+                for (var j = 0; j < brElements.length; j++) {
+                  if (brElements[j].parentNode) brElements[j].parentNode.removeChild(brElements[j]);
+                }
+              } catch (e) {}
+
+              // 2. Privacy masking on clone
               try {
                 var masked = doc.querySelectorAll("[data-bug-mask], input[type=password]");
                 for (var i = 0; i < masked.length; i++) {
@@ -310,6 +342,7 @@
               } catch (e) {}
             },
           }).then(function (canvas) {
+            restoreHost();
             canvas.toBlob(function (blob) {
               if (blob) {
                 resolve({ blob: blob, width: canvas.width, height: canvas.height, format: "png" });
@@ -318,9 +351,11 @@
               }
             }, "image/png");
           }).catch(function () {
+            restoreHost();
             resolve(null);
           });
         } catch (e) {
+          if (realHost) realHost.style.visibility = prevVisibility;
           resolve(null);
         }
       }
@@ -382,6 +417,7 @@
   function createWidgetUI() {
     var host = document.createElement("div");
     host.id = "bug-reporter-host";
+    host.setAttribute("data-html2canvas-ignore", "true");
     document.body.appendChild(host);
 
     var shadow = host.attachShadow({ mode: "open" });
@@ -400,6 +436,7 @@
     // Modal Backdrop
     var backdrop = document.createElement("div");
     backdrop.className = "br-backdrop";
+    backdrop.setAttribute("data-html2canvas-ignore", "true");
     backdrop.innerHTML = [
       '<div class="br-modal">',
       '  <div class="br-header">',
@@ -429,10 +466,12 @@
     // Element picker overlay
     var overlay = document.createElement("div");
     overlay.className = "br-picker-overlay";
+    overlay.setAttribute("data-html2canvas-ignore", "true");
     document.body.appendChild(overlay);
 
     var highlightBox = document.createElement("div");
     highlightBox.className = "br-picker-box";
+    highlightBox.setAttribute("data-html2canvas-ignore", "true");
     document.body.appendChild(highlightBox);
 
     var textarea = backdrop.querySelector(".br-textarea");

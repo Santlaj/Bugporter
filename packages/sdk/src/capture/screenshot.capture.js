@@ -131,7 +131,25 @@ export async function captureScreenshot() {
       useCORS: true,
       allowTaint: false,
       logging: false,
+      ignoreElements: (element) => {
+        if (!element) return false;
+        if (element.id === "bug-reporter-host") return true;
+        if (element.getAttribute && element.getAttribute("data-html2canvas-ignore") === "true") return true;
+        if (element.classList && (element.classList.contains("br-picker-overlay") || element.classList.contains("br-picker-box"))) return true;
+        return false;
+      },
       onclone: (clonedDoc) => {
+        try {
+          const brHost = clonedDoc.getElementById("bug-reporter-host");
+          if (brHost && brHost.parentNode) {
+            brHost.parentNode.removeChild(brHost);
+          }
+          const brElements = clonedDoc.querySelectorAll("[data-html2canvas-ignore], .br-picker-overlay, .br-picker-box, [id*='bug-reporter']");
+          brElements.forEach((el) => {
+            if (el.parentNode) el.parentNode.removeChild(el);
+          });
+        } catch {}
+
         // Apply privacy masking to the cloned DOM tree
         maskDomTree(clonedDoc.body);
       },

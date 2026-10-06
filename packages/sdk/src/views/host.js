@@ -16,7 +16,10 @@ export const hostView = {
     if (!host) {
       host = document.createElement("div");
       host.id = "bug-reporter-host";
+      host.setAttribute("data-html2canvas-ignore", "true");
       document.body.appendChild(host);
+    } else {
+      host.setAttribute("data-html2canvas-ignore", "true");
     }
 
     hostElement = host;
