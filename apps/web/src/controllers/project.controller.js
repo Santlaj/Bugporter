@@ -18,10 +18,16 @@ export const projectController = {
    * Lists all projects belonging to the user's organization.
    */
   async listProjects(userId) {
+    if (!userId) return [];
+
     let orgs = await organizationModel.findByOwnerId(userId);
     if (!orgs || orgs.length === 0) {
+      // Verify user exists in database before creating an organization
+      const user = await userModel.findById(userId);
+      if (!user) return [];
+
       const newOrg = await organizationModel.create({
-        name: "My Projects",
+        name: `${user.name || "My"}'s Projects`,
         slug: `workspace-${userId.slice(-6)}`,
         ownerId: userId,
       });

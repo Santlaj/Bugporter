@@ -58,7 +58,7 @@ export default async function IntegrationsPage({ searchParams }) {
     user = await authController.getCurrentUser();
   } catch {}
 
-  const projects = await projectController.listProjects(user?.id || "demo-dev");
+  const projects = user?.id ? await projectController.listProjects(user.id) : [];
   const selectedProjectId = searchParams?.projectId || projects[0]?.id;
 
   if (!selectedProjectId) {

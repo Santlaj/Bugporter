@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/views/layouts";
 import { authController } from "@/controllers";
 
+export const dynamic = "force-dynamic";
+
 export default async function Layout({ children }) {
   let user = null;
   try {
