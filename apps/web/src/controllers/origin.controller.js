@@ -23,17 +23,22 @@ export const originController = {
    * If no origins configured, allows localhost/preview or returns allowed based on policy.
    */
   async validateOrigin(projectId, requestOrigin) {
-    if (!requestOrigin) return true; // Direct non-browser or null origin handled per security rules
+    if (!requestOrigin || requestOrigin === "null") return true; // Direct non-browser or null origin
 
     const origins = await projectOriginModel.findByProjectId(projectId);
     // If no origins registered yet, default to allowing all (onboarding state)
     if (origins.length === 0) return true;
 
-    const normalizedReq = new URL(requestOrigin).origin;
-    const match = origins.some((o) => o.origin === normalizedReq);
+    try {
+      const normalizedReq = new URL(requestOrigin).origin;
+      const match = origins.some((o) => o.origin === normalizedReq);
 
-    if (!match) {
-      throw new ForbiddenError(`Origin '${requestOrigin}' is not authorized for this project`);
+      if (!match) {
+        throw new ForbiddenError(`Origin '${requestOrigin}' is not authorized for this project`);
+      }
+    } catch (err) {
+      if (err instanceof ForbiddenError) throw err;
+      return true;
     }
 
     return true;

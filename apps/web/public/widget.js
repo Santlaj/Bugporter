@@ -551,7 +551,14 @@
           body: JSON.stringify(payload),
         })
           .then(function (res) {
-            if (!res.ok) throw new Error("Server returned " + res.status);
+            if (!res.ok) {
+              return res.json().then(function (errBody) {
+                var msg = errBody.error || ("Server returned " + res.status);
+                throw new Error(msg);
+              }).catch(function (e) {
+                throw new Error(e.message || ("Server returned " + res.status));
+              });
+            }
             return res.json();
           })
           .then(function (reportRes) {

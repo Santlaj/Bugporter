@@ -2,63 +2,56 @@ import { z } from "zod";
 import { LIMITS } from "./constants";
 
 export const environmentSchema = z.object({
-  url: z.string().url().max(2048),
-  route: z.string().max(1024),
-  browser: z.string().max(100),
-  browserVersion: z.string().max(100),
-  os: z.string().max(100),
-  viewportWidth: z.number().int().positive(),
-  viewportHeight: z.number().int().positive(),
-  devicePixelRatio: z.number().positive(),
-  userAgent: z.string().max(1000).optional(),
-  language: z.string().max(50).optional(),
-  timezone: z.string().max(100).optional(),
-  referrer: z.string().max(2048).optional(),
-  timestamp: z.number().or(z.string()).optional(),
+  url: z.string().max(2048),
+  route: z.string().max(1024).optional().default("/"),
+  browser: z.string().max(100).optional().default("Unknown"),
+  browserVersion: z.string().max(100).optional().default(""),
+  os: z.string().max(100).optional().default("Unknown"),
+  viewportWidth: z.coerce.number().optional().default(0),
+  viewportHeight: z.coerce.number().optional().default(0),
+  devicePixelRatio: z.coerce.number().optional().default(1),
+  userAgent: z.string().max(2048).optional().nullable(),
+  language: z.string().max(50).optional().nullable(),
+  timezone: z.string().max(100).optional().nullable(),
+  referrer: z.string().max(2048).optional().nullable(),
+  timestamp: z.any().optional(),
 });
 
 export const breadcrumbSchema = z.object({
-  type: z.enum(["click", "navigation", "console_error", "network_error", "custom"]),
-  message: z.string().max(500),
-  timestamp: z.number(),
-  data: z.record(z.any()).optional(),
+  type: z.string().max(50).optional().default("custom"),
+  message: z.string().max(1000).optional().default(""),
+  timestamp: z.any().optional(),
+  data: z.any().optional(),
 });
 
 export const consoleEventSchema = z.object({
-  level: z.enum(["error", "warn", "info", "log"]),
-  args: z.array(z.string().max(1000)).max(20),
-  timestamp: z.number(),
-  stack: z.string().max(5000).optional(),
+  level: z.string().max(20).optional().default("log"),
+  args: z.any().optional(),
+  timestamp: z.any().optional(),
+  stack: z.string().max(10000).optional(),
 });
 
 export const networkEventSchema = z.object({
-  type: z.enum(["fetch", "xhr"]),
-  method: z.string().max(10),
-  url: z.string().max(2048),
-  status: z.number().int().optional(),
-  duration: z.number().nonnegative().optional(),
-  timestamp: z.number(),
-  error: z.string().max(500).optional(),
+  type: z.string().max(20).optional().default("fetch"),
+  method: z.string().max(20).optional().default("GET"),
+  url: z.string().max(4096),
+  status: z.coerce.number().optional(),
+  duration: z.coerce.number().optional(),
+  timestamp: z.any().optional(),
+  error: z.string().max(1000).optional(),
 });
 
 export const elementSelectionSchema = z.object({
-  tag: z.string().max(50),
-  selector: z.string().max(500),
-  text: z.string().max(500).optional(),
-  rect: z
-    .object({
-      x: z.number(),
-      y: z.number(),
-      width: z.number(),
-      height: z.number(),
-    })
-    .optional(),
+  tag: z.string().max(50).optional().nullable(),
+  selector: z.string().max(1000).optional().nullable(),
+  text: z.string().max(1000).optional().nullable(),
+  rect: z.any().optional().nullable(),
 });
 
 export const reportSubmitSchema = z.object({
   apiKey: z.string().min(1, "Public API key is required"),
   description: z.string().min(1, "Description is required").max(LIMITS.MAX_DESCRIPTION_BYTES),
-  title: z.string().max(255).optional(),
+  title: z.string().max(255).optional().nullable(),
   environment: environmentSchema,
   element: elementSelectionSchema.optional().nullable(),
   breadcrumbs: z.array(breadcrumbSchema).max(LIMITS.MAX_BREADCRUMBS).default([]),

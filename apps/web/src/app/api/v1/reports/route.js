@@ -18,6 +18,7 @@ export async function POST(request) {
     return jsonWithCors(result, { status: 201 });
   } catch (error) {
     if (error instanceof AppError) {
+      console.warn("[Ingestion Error]", error.statusCode, error.message, error.details);
       return jsonWithCors(
         { error: error.message, code: error.code, details: error.details },
         { status: error.statusCode }
