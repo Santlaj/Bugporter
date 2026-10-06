@@ -1,5 +1,6 @@
 import { networkStore } from "../models/network-store";
 import { breadcrumbStore } from "../models/breadcrumb-store";
+import { consoleStore } from "../models/console-store";
 
 let isInstrumented = false;
 let originalFetch = null;
@@ -54,6 +55,12 @@ export function initFetchCapture() {
               timestamp: Date.now(),
               data: { status, duration },
             });
+
+            consoleStore.push({
+              level: "error",
+              args: [`Failed to load resource: the server responded with a status of ${status} (${method} ${url})`],
+              timestamp: Date.now(),
+            });
           }
         } catch {
           // Fail silently
@@ -79,6 +86,12 @@ export function initFetchCapture() {
             message: `${method} ${url} network failure`,
             timestamp: Date.now(),
             data: { error: error ? error.message : "Network error" },
+          });
+
+          consoleStore.push({
+            level: "error",
+            args: [`NetworkError: ${error ? error.message : "Request failed"} (${method} ${url})`],
+            timestamp: Date.now(),
           });
         } catch {
           // Fail silently

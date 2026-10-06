@@ -27,7 +27,11 @@ export function ConsolePanel({ consoleEvents = [] }) {
         {consoleEvents.map((ev, idx) => {
           const payload = ev.payload || ev;
           const level = payload.level || "log";
-          const args = payload.args || [];
+          const args = Array.isArray(payload.args)
+            ? payload.args
+            : payload.message
+            ? [payload.message]
+            : [typeof payload === "string" ? payload : JSON.stringify(payload)];
           const isError = level === "error";
           const isWarn = level === "warn";
 
@@ -52,12 +56,12 @@ export function ConsolePanel({ consoleEvents = [] }) {
                     [{level}]
                   </span>
                   <span className="text-[10px] opacity-40">
-                    {new Date(ev.timestamp).toLocaleTimeString()}
+                    {ev.timestamp ? new Date(ev.timestamp).toLocaleTimeString() : ""}
                   </span>
                 </div>
 
                 <div className="mt-1 whitespace-pre-wrap break-all leading-relaxed">
-                  {args.join(" ")}
+                  {args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")}
                 </div>
 
                 {payload.stack && (

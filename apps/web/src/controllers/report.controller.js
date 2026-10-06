@@ -35,12 +35,24 @@ export const reportController = {
 
     // Build optimized Cloudinary URLs
     let screenshotUrls = null;
-    if (screenshot?.publicId) {
-      screenshotUrls = {
-        thumbnail: cloudinaryService.buildImageUrl(screenshot.publicId, { width: 400 }),
-        detail: cloudinaryService.buildImageUrl(screenshot.publicId, { width: 1000 }),
-        original: screenshot.url,
-      };
+    if (screenshot) {
+      try {
+        screenshotUrls = {
+          thumbnail: screenshot.publicId
+            ? cloudinaryService.buildImageUrl(screenshot.publicId, { width: 400 })
+            : screenshot.url,
+          detail: screenshot.publicId
+            ? cloudinaryService.buildImageUrl(screenshot.publicId, { width: 1000 })
+            : screenshot.url,
+          original: screenshot.url,
+        };
+      } catch (err) {
+        screenshotUrls = {
+          thumbnail: screenshot.url,
+          detail: screenshot.url,
+          original: screenshot.url,
+        };
+      }
     }
 
     return {

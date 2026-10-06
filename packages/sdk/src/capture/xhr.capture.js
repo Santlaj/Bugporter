@@ -1,5 +1,6 @@
 import { networkStore } from "../models/network-store";
 import { breadcrumbStore } from "../models/breadcrumb-store";
+import { consoleStore } from "../models/console-store";
 
 let isInstrumented = false;
 let originalOpen = null;
@@ -49,6 +50,12 @@ export function initXhrCapture() {
                 message: `XHR ${meta.method} ${meta.url} ${status === 0 ? "failed" : `status ${status}`}`,
                 timestamp: Date.now(),
                 data: { status, duration },
+              });
+
+              consoleStore.push({
+                level: "error",
+                args: [`Failed to load resource: the server responded with a status of ${status} (${meta.method} ${meta.url})`],
+                timestamp: Date.now(),
               });
             }
           } catch {

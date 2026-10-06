@@ -69,7 +69,8 @@ export const uploadCompleteSchema = z.object({
   publicId: z.string().min(1),
   url: z.string().url(),
   format: z.string().default("webp"),
-  width: z.number().int().positive(),
-  height: z.number().int().positive(),
-  bytes: z.number().int().positive().max(LIMITS.MAX_SCREENSHOT_BYTES),
+  width: z.union([z.number(), z.string()]).transform((v) => Math.max(1, Math.round(Number(v) || 1))),
+  height: z.union([z.number(), z.string()]).transform((v) => Math.max(1, Math.round(Number(v) || 1))),
+  bytes: z.union([z.number(), z.string()]).optional().transform((v) => Math.max(1, Math.round(Number(v) || 1024))),
 });
+

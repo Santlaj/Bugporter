@@ -27,12 +27,16 @@ export function generateUploadSignature(projectId, reportId) {
     process.env.CLOUDINARY_API_SECRET
   );
 
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
   return {
     timestamp,
     folder,
     signature,
     apiKey: process.env.CLOUDINARY_API_KEY,
-    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    cloudName,
+    uploadUrl,
   };
 }
 

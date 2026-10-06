@@ -170,23 +170,34 @@
         return origFetch.apply(this, arguments).then(
           function (res) {
             try {
-              // Don't record reports ingestion calls into breadcrumbs to avoid self-loops
-              if (!url.includes("/api/v1/reports")) {
+              // Don't record reports ingestion calls into telemetry to avoid self-loops
+              if (!url.includes("/api/v1/reports") && !url.includes("cloudinary.com")) {
                 pushBounded(networkEvents, {
+                  type: "fetch",
                   method: method,
                   url: redactUrl(url),
                   status: res.status,
                   duration: Date.now() - start,
                   timestamp: new Date().toISOString(),
                 }, MAX_NETWORK);
+
+                // Auto-record HTTP 4xx/5xx responses as console errors so developers see them in the console panel
+                if (res.status >= 400) {
+                  pushBounded(consoleEvents, {
+                    level: "error",
+                    args: ["Failed to load resource: the server responded with a status of " + res.status + " (" + method + " " + redactUrl(url) + ")"],
+                    timestamp: new Date().toISOString(),
+                  }, MAX_CONSOLE);
+                }
               }
             } catch (e) {}
             return res;
           },
           function (err) {
             try {
-              if (!url.includes("/api/v1/reports")) {
+              if (!url.includes("/api/v1/reports") && !url.includes("cloudinary.com")) {
                 pushBounded(networkEvents, {
+                  type: "fetch",
                   method: method,
                   url: redactUrl(url),
                   status: 0,
@@ -194,6 +205,12 @@
                   duration: Date.now() - start,
                   timestamp: new Date().toISOString(),
                 }, MAX_NETWORK);
+
+                pushBounded(consoleEvents, {
+                  level: "error",
+                  args: ["NetworkError: " + (err.message || "Request failed") + " (" + method + " " + redactUrl(url) + ")"],
+                  timestamp: new Date().toISOString(),
+                }, MAX_CONSOLE);
               }
             } catch (e) {}
             throw err;
@@ -572,6 +589,9 @@
                 .then(function (sigData) {
                   if (!sigData || !sigData.signature) return reportRes;
 
+                  var uploadTarget = sigData.uploadUrl || (sigData.cloudName ? ("https://api.cloudinary.com/v1_1/" + sigData.cloudName + "/image/upload") : null);
+                  if (!uploadTarget) return reportRes;
+
                   var formData = new FormData();
                   formData.append("file", screenshotData.blob, "screenshot.png");
                   formData.append("api_key", sigData.apiKey);
@@ -579,7 +599,7 @@
                   formData.append("signature", sigData.signature);
                   formData.append("folder", sigData.folder || "bug-reports");
 
-                  return fetch(sigData.uploadUrl, { method: "POST", body: formData })
+                  return fetch(uploadTarget, { method: "POST", body: formData })
                     .then(function (cRes) { return cRes.ok ? cRes.json() : null; })
                     .then(function (cData) {
                       if (!cData) return reportRes;
@@ -592,9 +612,9 @@
                           publicId: cData.public_id,
                           url: cData.secure_url || cData.url,
                           format: cData.format || "png",
-                          width: cData.width || screenshotData.width,
-                          height: cData.height || screenshotData.height,
-                          bytes: cData.bytes || screenshotData.blob.size,
+                          width: Math.round(cData.width || screenshotData.width || 1),
+                          height: Math.round(cData.height || screenshotData.height || 1),
+                          bytes: Math.round(cData.bytes || (screenshotData.blob ? screenshotData.blob.size : 1024)),
                         }),
                       });
                     });
