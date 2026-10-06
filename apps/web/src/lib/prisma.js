@@ -32,4 +32,11 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
+// Auto-ensure password column exists in PostgreSQL (Neon DB)
+if (typeof prisma.$executeRawUnsafe === "function") {
+  prisma
+    .$executeRawUnsafe('ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "password" TEXT;')
+    .catch(() => {});
+}
+
 export default prisma;

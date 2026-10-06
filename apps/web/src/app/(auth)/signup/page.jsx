@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/views/layouts";
-import { ArrowRight, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Lock, Mail, User, Eye, EyeOff } from "lucide-react";
 
 function GoogleIcon() {
   return (
@@ -18,8 +18,9 @@ function GoogleIcon() {
   );
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,26 +33,43 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
+      // 1. Register the account
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create account.");
+      }
+
+      // 2. Automatically sign in immediately after registration
+      const loginResult = await signIn("credentials", {
         email: email.trim(),
         password,
         redirect: false,
       });
 
-      if (result?.error) {
-        setError(result.error);
+      if (loginResult?.error) {
+        router.push("/login");
       } else {
         router.push("/dashboard/projects");
         router.refresh();
       }
     } catch (err) {
-      setError(err.message || "Failed to sign in.");
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignUp = () => {
     setLoading(true);
     setError("");
     signIn("google", { callbackUrl: "/dashboard/projects" });
@@ -59,8 +77,8 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      title="Sign In to Bug Reporter"
-      subtitle="Enter your account to access your projects and reports"
+      title="Create Your Account"
+      subtitle="Register to protect and manage your website bug reports and telemetry"
     >
       <div className="space-y-4">
         {error && (
@@ -73,12 +91,12 @@ export default function LoginPage() {
         {/* Google OAuth Button */}
         <button
           type="button"
-          onClick={handleGoogleSignIn}
+          onClick={handleGoogleSignUp}
           disabled={loading}
           className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800/90 border border-slate-700/80 rounded-lg text-xs font-semibold text-slate-100 flex items-center justify-center gap-3 transition shadow-sm hover:border-slate-600 disabled:opacity-50"
         >
           <GoogleIcon />
-          <span>Continue with Google</span>
+          <span>Sign up with Google</span>
         </button>
 
         <div className="relative my-3">
@@ -86,19 +104,38 @@ export default function LoginPage() {
             <div className="w-full border-t border-slate-800" />
           </div>
           <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-            <span className="bg-slate-900 px-3 text-slate-500 font-medium">or continue with email</span>
+            <span className="bg-slate-900 px-3 text-slate-500 font-medium">or register with email</span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5" htmlFor="login-email">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5" htmlFor="signup-name">
+              Your Name
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <input
+                id="signup-name"
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition"
+                placeholder="e.g. Alex Sharma"
+                autoComplete="name"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5" htmlFor="signup-email">
               Email Address
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <input
-                id="login-email"
+                id="signup-email"
                 type="email"
                 required
                 value={email}
@@ -111,20 +148,21 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5" htmlFor="login-password">
-              Password
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5" htmlFor="signup-password">
+              Password (min 6 characters)
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <input
-                id="login-password"
+                id="signup-password"
                 type={showPassword ? "text" : "password"}
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-10 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition"
                 placeholder="••••••••"
-                autoComplete="current-password"
+                autoComplete="new-password"
               />
               <button
                 type="button"
@@ -141,14 +179,14 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full mt-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition"
           >
-            <span>{loading ? "Signing in..." : "Sign In to Dashboard"}</span>
+            <span>{loading ? "Creating Account..." : "Create Account & Enter"}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
 
           <div className="pt-2 text-center text-xs text-slate-400">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4">
-              Sign up for free
+            Already have an account?{" "}
+            <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4">
+              Sign In
             </Link>
           </div>
         </form>

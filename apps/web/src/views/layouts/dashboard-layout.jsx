@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Bug, FolderGit2, Settings, Shield, Bell, ExternalLink, User } from "lucide-react";
+import { UserProfileButton } from "../components/user-profile-button";
 
 export function DashboardLayout({ children, currentPath = "/dashboard", user = null }) {
   const navItems = [
@@ -44,16 +45,8 @@ export function DashboardLayout({ children, currentPath = "/dashboard", user = n
           })}
         </nav>
 
-        {/* User footer */}
-        <div className="p-4 border-t border-slate-800/80 flex items-center gap-3 bg-slate-900/40">
-          <div className="h-9 w-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-semibold text-xs">
-            {user?.name ? user.name[0].toUpperCase() : <User className="h-4 w-4" />}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-white truncate">{user?.name || "Developer"}</p>
-            <p className="text-[11px] text-slate-400 truncate">{user?.email || "developer@example.com"}</p>
-          </div>
-        </div>
+        {/* User footer with Sign Out */}
+        <UserProfileButton user={user} />
       </aside>
 
       {/* Main Container */}

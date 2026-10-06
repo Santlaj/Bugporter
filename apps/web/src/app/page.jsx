@@ -17,15 +17,18 @@ export default function HomePage() {
           <span className="font-bold text-base tracking-tight text-white">Bug Reporter</span>
         </div>
 
-        <nav className="flex items-center gap-6 text-xs font-medium">
+        <nav className="flex items-center gap-4 text-xs font-medium">
           <Link href="/docs" className="text-slate-400 hover:text-slate-200 transition">
             Documentation
           </Link>
+          <Link href="/login" className="text-slate-300 hover:text-white px-3 py-1.5 transition">
+            Sign In
+          </Link>
           <Link
-            href="/dashboard/projects"
+            href="/signup"
             className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/25 transition"
           >
-            Launch Dashboard
+            Get Started
           </Link>
         </nav>
       </header>

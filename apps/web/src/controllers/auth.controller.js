@@ -1,33 +1,46 @@
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { getServerSession } from "next-auth/next";
 import { userModel, organizationModel } from "../models";
-import { UnauthorizedError } from "../lib/errors";
+import { hashPassword, verifyPassword } from "../lib/auth-utils";
+import { UnauthorizedError, ValidationError } from "../lib/errors";
+import prisma from "../lib/prisma";
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "missing-google-client-id",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "missing-google-client-secret",
+      allowDangerousEmailAccountLinking: true,
+    }),
     CredentialsProvider({
-      name: "Developer Credentials",
+      name: "Account Credentials",
       credentials: {
         email: { label: "Email", type: "email", placeholder: "developer@example.com" },
-        name: { label: "Name", type: "text", placeholder: "Alex Developer" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Please enter both email and password.");
+        }
 
-        // Find or auto-provision developer user and default organization
-        let user = await userModel.findByEmail(credentials.email);
+        const email = credentials.email.toLowerCase().trim();
+        const user = await userModel.findByEmail(email);
+
         if (!user) {
-          user = await userModel.create({
-            email: credentials.email,
-            name: credentials.name || credentials.email.split("@")[0],
-          });
+          throw new Error("No account found with this email. Please sign up first.");
+        }
 
-          // Create default organization for new developer
-          await organizationModel.create({
-            name: `${user.name}'s Team`,
-            slug: `${user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-")}-org`,
-            ownerId: user.id,
-          });
+        // Handle legacy accounts or verify hashed password
+        if (user.password) {
+          const isValid = verifyPassword(credentials.password, user.password);
+          if (!isValid) {
+            throw new Error("Incorrect password. Please try again.");
+          }
+        } else {
+          // If created previously without password, set password on first login
+          const hashedPassword = hashPassword(credentials.password);
+          await userModel.update(user.id, { password: hashedPassword });
         }
 
         return {
@@ -40,8 +53,55 @@ export const authOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        if (!user?.email) return false;
+        const normalizedEmail = user.email.toLowerCase().trim();
+        let dbUser = await userModel.findByEmail(normalizedEmail);
+
+        if (!dbUser) {
+          const displayName = user.name || normalizedEmail.split("@")[0];
+          dbUser = await userModel.create({
+            email: normalizedEmail,
+            name: displayName,
+            image: user.image || null,
+          });
+
+          const org = await organizationModel.create({
+            name: `${displayName}'s Workspace`,
+            slug: `workspace-${dbUser.id.slice(-6)}`,
+            ownerId: dbUser.id,
+          });
+
+          // Transfer existing projects from demo/developer placeholder to newly registered owner
+          try {
+            const devUser = await userModel.findByEmail("developer@bugreporter.local");
+            if (devUser) {
+              const devOrgs = await organizationModel.findByOwnerId(devUser.id);
+              for (const devOrg of devOrgs) {
+                await prisma.project.updateMany({
+                  where: { organizationId: devOrg.id },
+                  data: { organizationId: org.id },
+                });
+              }
+            }
+          } catch (err) {
+            console.warn("Could not transfer existing projects:", err.message);
+          }
+        } else {
+          if (user.image && !dbUser.image) {
+            await userModel.update(dbUser.id, { image: user.image });
+          }
+        }
+
+        user.id = dbUser.id;
+        return true;
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -58,14 +118,72 @@ export const authOptions = {
   pages: {
     signIn: "/login",
   },
-  secret: process.env.NEXTAUTH_SECRET || "development-secret-bug-reporter-12345",
+  secret: process.env.NEXTAUTH_SECRET || "bug-reporter-production-auth-secret-key-32chars",
 };
 
 export const authController = {
   /**
+   * Registers a new user with secure password hashing and workspace provisioning.
+   */
+  async register({ email, password, name }) {
+    if (!email || !email.includes("@")) {
+      throw new ValidationError("A valid email address is required.");
+    }
+
+    if (!password || password.length < 6) {
+      throw new ValidationError("Password must be at least 6 characters long.");
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await userModel.findByEmail(normalizedEmail);
+
+    if (existing) {
+      throw new ValidationError("An account with this email already exists. Please log in.");
+    }
+
+    const hashedPassword = hashPassword(password);
+    const displayName = (name && name.trim()) || normalizedEmail.split("@")[0];
+
+    // Create user
+    const user = await userModel.create({
+      email: normalizedEmail,
+      password: hashedPassword,
+      name: displayName,
+    });
+
+    // Create primary workspace organization
+    const org = await organizationModel.create({
+      name: `${displayName}'s Workspace`,
+      slug: `workspace-${user.id.slice(-6)}`,
+      ownerId: user.id,
+    });
+
+    // Transfer any existing projects from demo/developer placeholder to newly registered owner
+    try {
+      const devUser = await userModel.findByEmail("developer@bugreporter.local");
+      if (devUser) {
+        const devOrgs = await organizationModel.findByOwnerId(devUser.id);
+        for (const devOrg of devOrgs) {
+          await prisma.project.updateMany({
+            where: { organizationId: devOrg.id },
+            data: { organizationId: org.id },
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Could not transfer existing projects:", err.message);
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    };
+  },
+
+  /**
    * Retrieves active server session and user record.
-   * If in local environment or no session is present, provides a persistent
-   * developer user and organization so project creation and navigation work seamlessly.
+   * Returns null if unauthenticated so protected pages can enforce redirect to /login.
    */
   async getCurrentUser() {
     try {
@@ -76,37 +194,7 @@ export const authController = {
       }
     } catch {}
 
-    // Fallback for local workspace developer:
-    return this.getOrCreateDeveloperUser();
-  },
-
-  /**
-   * Auto-provisions or retrieves the primary developer workspace user and org.
-   */
-  async getOrCreateDeveloperUser() {
-    let user = await userModel.findByEmail("developer@bugreporter.local");
-    if (!user) {
-      user = await userModel.findByEmail("demo@bugreporter.dev");
-    }
-
-    if (!user) {
-      user = await userModel.create({
-        email: "developer@bugreporter.local",
-        name: "Developer",
-      });
-    }
-
-    // Ensure the user has an organization
-    const orgs = await organizationModel.findByOwnerId(user.id);
-    if (!orgs || orgs.length === 0) {
-      await organizationModel.create({
-        name: "My Projects",
-        slug: `workspace-${user.id.slice(-6)}`,
-        ownerId: user.id,
-      });
-    }
-
-    return user;
+    return null;
   },
 
   /**

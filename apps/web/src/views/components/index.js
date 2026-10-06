@@ -10,3 +10,4 @@ export { NetworkPanel } from "./network-panel";
 export { EnvironmentInfo } from "./environment-info";
 export { ReportDetail } from "./report-detail";
 export { InstallSnippet } from "./install-snippet";
+export { UserProfileButton } from "./user-profile-button";
