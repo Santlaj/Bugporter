@@ -2,8 +2,18 @@ import Link from "next/link";
 import { Bug, ArrowLeft, Shield, Lock, Terminal, Globe, Code2 } from "lucide-react";
 
 export const metadata = {
-  title: "Documentation — Bug Reporter",
-  description: "Complete guide on installing the SDK, Content Security Policy (CSP) setup, DOM privacy masking, and API reference.",
+  title: "Documentation & Integration Guide",
+  description:
+    "Complete guide on installing the SDK, Content Security Policy (CSP) setup, DOM privacy masking, and API reference.",
+  alternates: {
+    canonical: "https://bugporter.in/docs",
+  },
+  openGraph: {
+    title: "Documentation & Integration Guide — Bug Reporter",
+    description:
+      "Complete guide on installing the SDK, Content Security Policy (CSP) setup, DOM privacy masking, and API reference.",
+    url: "https://bugporter.in/docs",
+  },
 };
 
 export default function DocsPage() {

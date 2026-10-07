@@ -4,3 +4,4 @@ Disallow: /api/
 Disallow: /dashboard/
 
 Sitemap: https://bugporter.in/sitemap.xml
+Host: https://bugporter.in
