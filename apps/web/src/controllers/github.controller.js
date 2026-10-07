@@ -71,7 +71,7 @@ ${networkSection}
 ${screenshotSection}
 
 ---
-*Reported through Bug Reporter*  
+*Reported through Bug Porter*  
 **Report ID:** \`${report.id}\` • [View in Dashboard](${reportUrl})
 `;
 }

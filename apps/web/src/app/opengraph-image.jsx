@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Bug Reporter — Developer-ready bug reports in one click";
+export const alt = "Bug Porter — Developer-ready bug reports in one click";
 export const size = {
   width: 1200,
   height: 630,
@@ -55,7 +55,7 @@ export default function Image() {
               letterSpacing: "-0.03em",
             }}
           >
-            Bug Reporter
+            Bug Porter
           </span>
         </div>
 

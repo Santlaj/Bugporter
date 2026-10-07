@@ -61,7 +61,7 @@ export default async function ProjectsPage() {
             <span>Projects</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage your websites and obtain integration keys for Bug Reporter
+            Manage your websites and obtain integration keys for Bug Porter
           </p>
         </div>
 

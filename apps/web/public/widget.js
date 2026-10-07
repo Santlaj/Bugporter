@@ -1,5 +1,5 @@
 /**
- * Bug Reporter — Standalone Browser SDK & Widget
+ * Bug Porter — Standalone Browser SDK & Widget
  * Zero external bundle dependencies. Self-contained Shadow DOM UI & telemetry instrumentation.
  */
 (function (global) {

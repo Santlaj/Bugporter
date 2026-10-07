@@ -18,7 +18,7 @@ export function DashboardLayout({ children, currentPath = "/dashboard", user = n
             <Bug className="h-5 w-5" />
           </div>
           <div>
-            <span className="font-bold text-sm tracking-tight text-white block">Bug Reporter</span>
+            <span className="font-bold text-sm tracking-tight text-white block">Bug Porter</span>
             <span className="text-[10px] text-indigo-400 font-medium">Developer Dashboard</span>
           </div>
         </div>

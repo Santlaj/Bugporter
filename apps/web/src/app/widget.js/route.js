@@ -17,7 +17,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Failed to serve widget.js:", error);
-    return new NextResponse("// Failed to load Bug Reporter widget", {
+    return new NextResponse("// Failed to load Bug Porter widget", {
       status: 500,
       headers: {
         "Content-Type": "application/javascript; charset=utf-8",

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Bug, ArrowRight, ShieldCheck, Terminal, Laptop, Cpu, Github, Send, EyeOff, Sparkles, CheckCircle2 } from "lucide-react";
 
 export const metadata = {
-  title: "Bug Reporter — Developer-ready bug reports in one click",
+  title: "Bug Porter — Developer-ready bug reports in one click",
   description:
     "A lightweight browser SDK for small engineering teams that turns user bug reports into ready-to-fix GitHub issues with screenshots, logs, and breadcrumbs.",
   alternates: {
@@ -16,7 +16,7 @@ const faqStructuredData = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "How does Bug Reporter protect sensitive customer data?",
+      name: "How does Bug Porter protect sensitive customer data?",
       acceptedAnswer: {
         "@type": "Answer",
         text: "Privacy masking happens client-side before any data leaves the user's browser. All password inputs and elements marked with data-bug-mask are replaced with placeholders, and auth tokens or cookies are never captured.",
@@ -35,7 +35,7 @@ const faqStructuredData = {
       name: "How does duplicate bug grouping work?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Bug Reporter computes a deterministic SHA-256 fingerprint from the normalized error message, top stack trace frame, and route path, grouping repeated failures automatically so your backlog stays clean.",
+        text: "Bug Porter computes a deterministic SHA-256 fingerprint from the normalized error message, top stack trace frame, and route path, grouping repeated failures automatically so your backlog stays clean.",
       },
     },
   ],
@@ -58,7 +58,7 @@ export default function HomePage() {
           <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30">
             <Bug className="h-5 w-5" />
           </div>
-          <span className="font-bold text-base tracking-tight text-white">Bug Reporter</span>
+          <span className="font-bold text-base tracking-tight text-white">Bug Porter</span>
         </div>
 
         <nav className="flex items-center gap-4 text-xs font-medium">
@@ -94,7 +94,7 @@ export default function HomePage() {
           </h1>
 
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed">
-            One script tag. When your users or QA click report, Bug Reporter captures a masked viewport screenshot, recent click breadcrumbs, console errors, and network telemetry automatically.
+            One script tag. When your users or QA click report, Bug Porter captures a masked viewport screenshot, recent click breadcrumbs, console errors, and network telemetry automatically.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -117,7 +117,7 @@ export default function HomePage() {
         {/* Before / After Comparison */}
         <section className="max-w-5xl mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Without Bug Reporter */}
+            {/* Without Bug Porter */}
             <div className="rounded-2xl border border-red-900/30 bg-red-950/10 p-6 space-y-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-red-400 uppercase tracking-wider">
                 <span>Standard User Feedback</span>
@@ -136,11 +136,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* With Bug Reporter */}
+            {/* With Bug Porter */}
             <div className="rounded-2xl border border-indigo-500/30 bg-indigo-950/20 p-6 space-y-4 relative overflow-hidden shadow-xl shadow-indigo-950/40">
               <div className="flex items-center gap-2 text-xs font-semibold text-indigo-400 uppercase tracking-wider">
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>With Bug Reporter</span>
+                <span>With Bug Porter</span>
               </div>
               <div className="bg-slate-950/90 p-4 rounded-xl border border-indigo-500/20 font-mono text-xs text-indigo-200">
                 &ldquo;Checkout doesn&apos;t work.&rdquo; + Complete Diagnostic Context
@@ -219,7 +219,7 @@ export default function HomePage() {
           </h2>
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-left font-mono text-xs text-indigo-300 shadow-2xl overflow-x-auto">
             <p className="text-slate-500 mb-2">// 1. Paste into your HTML</p>
-            <code>&lt;script async src=&quot;https://cdn.bugreporter.dev/widget.js&quot; data-key=&quot;pk_abc123&quot;&gt;&lt;/script&gt;</code>
+            <code>&lt;script async src=&quot;https://bugporter.in/widget.js&quot; data-key=&quot;pk_abc123&quot;&gt;&lt;/script&gt;</code>
             <p className="text-slate-500 mt-4 mb-2">// 2. That&apos;s it! The widget isolates inside Shadow DOM automatically.</p>
           </div>
         </section>
@@ -230,12 +230,12 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
               Frequently Asked Questions
             </h2>
-            <p className="text-xs text-slate-400">Everything you need to know about the Bug Reporter SDK and platform.</p>
+            <p className="text-xs text-slate-400">Everything you need to know about the Bug Porter SDK and platform.</p>
           </div>
 
           <div className="space-y-4">
             <div className="p-5 rounded-xl border border-slate-800 bg-slate-900/40 space-y-2">
-              <h3 className="text-sm font-semibold text-white">How does Bug Reporter protect sensitive customer data?</h3>
+              <h3 className="text-sm font-semibold text-white">How does Bug Porter protect sensitive customer data?</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Privacy masking happens client-side before any data leaves the user&apos;s browser. All password inputs and elements marked with <code className="text-slate-300">data-bug-mask</code> are replaced with placeholders, and auth tokens or cookies are never captured.
               </p>
@@ -251,7 +251,7 @@ export default function HomePage() {
             <div className="p-5 rounded-xl border border-slate-800 bg-slate-900/40 space-y-2">
               <h3 className="text-sm font-semibold text-white">How does duplicate bug grouping work?</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Bug Reporter computes a deterministic SHA-256 fingerprint from the normalized error message, top stack trace frame, and route path, grouping repeated failures automatically so your backlog stays clean.
+                Bug Porter computes a deterministic SHA-256 fingerprint from the normalized error message, top stack trace frame, and route path, grouping repeated failures automatically so your backlog stays clean.
               </p>
             </div>
           </div>
@@ -260,7 +260,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950 px-6 py-8 text-center text-xs text-slate-500">
-        <p>Bug Reporter • Developer-ready bug reports in one click.</p>
+        <p>Bug Porter • Developer-ready bug reports in one click.</p>
       </footer>
     </div>
   );

@@ -1,6 +1,6 @@
 export const metadata = {
   title: "Sign In",
-  description: "Sign in to your Bug Reporter developer dashboard.",
+  description: "Sign in to your Bug Porter developer dashboard.",
   alternates: {
     canonical: "https://bugporter.in/login",
   },

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Bug } from "lucide-react";
 
-export function AuthLayout({ children, title = "Sign in to Bug Reporter", subtitle = "Manage projects, inspect incoming bugs, and track telemetry" }) {
+export function AuthLayout({ children, title = "Sign in to Bug Porter", subtitle = "Manage projects, inspect incoming bugs, and track telemetry" }) {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100 relative overflow-hidden">
       {/* Background ambient glow */}

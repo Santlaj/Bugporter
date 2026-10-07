@@ -5,12 +5,15 @@ const siteUrl = "https://bugporter.in";
 export const metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Bug Reporter - Developer-ready bug reports in one click",
-    template: "%s | Bug Reporter",
+    default: "Bug Porter — Developer-ready bug reports in one click",
+    template: "%s | Bug Porter",
   },
   description:
-    "A lightweight browser SDK and dashboard for engineering teams. Captures masked screenshots, console errors, network failures, and click breadcrumbs without slowing down your app.",
+    "Bug Porter is a lightweight browser SDK and developer dashboard for engineering teams. Turns user bug reports into ready-to-fix GitHub issues with screenshots, logs, and breadcrumbs.",
   keywords: [
+    "Bug Porter",
+    "Bugporter",
+    "bugporter.in",
     "bug reporter",
     "bug tracking SDK",
     "issue reporting",
@@ -22,10 +25,10 @@ export const metadata = {
     "DOM privacy masking",
     "lightweight bug reporter",
   ],
-  authors: [{ name: "Bug Reporter", url: siteUrl }],
-  creator: "Bug Reporter",
-  publisher: "Bug Reporter",
-  applicationName: "Bug Reporter",
+  authors: [{ name: "Bug Porter", url: siteUrl }],
+  creator: "Bug Porter",
+  publisher: "Bug Porter",
+  applicationName: "Bug Porter",
   alternates: {
     canonical: siteUrl,
   },
@@ -36,8 +39,8 @@ export const metadata = {
     type: "website",
     locale: "en_US",
     url: siteUrl,
-    siteName: "Bug Reporter",
-    title: "Bug Reporter — Developer-ready bug reports in one click",
+    siteName: "Bug Porter",
+    title: "Bug Porter — Developer-ready bug reports in one click",
     description:
       "A lightweight browser SDK that turns 'it\\'s broken' into an actionable GitHub issue with screenshots, console logs, and breadcrumbs.",
     images: [
@@ -45,13 +48,13 @@ export const metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Bug Reporter — Developer-ready bug reports in one click",
+        alt: "Bug Porter — Developer-ready bug reports in one click",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bug Reporter — Developer-ready bug reports in one click",
+    title: "Bug Porter — Developer-ready bug reports in one click",
     description:
       "A lightweight browser SDK that turns 'it\\'s broken' into an actionable GitHub issue with screenshots, console logs, and breadcrumbs.",
     images: ["/og-image.png"],
@@ -84,7 +87,8 @@ const structuredData = {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       url: siteUrl,
-      name: "Bug Reporter",
+      name: "Bug Porter",
+      alternateName: ["Bugporter", "Bugporter.in"],
       description:
         "A lightweight bug reporter for small teams that turns 'it's broken' into a ready-to-fix GitHub issue.",
       publisher: {
@@ -94,7 +98,8 @@ const structuredData = {
     {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
-      name: "Bug Reporter",
+      name: "Bug Porter",
+      alternateName: "Bugporter",
       url: siteUrl,
       logo: `${siteUrl}/icon.png`,
       sameAs: ["https://github.com/Santlaj/Bugporter"],
@@ -102,7 +107,8 @@ const structuredData = {
     {
       "@type": "SoftwareApplication",
       "@id": `${siteUrl}/#software`,
-      name: "Bug Reporter",
+      name: "Bug Porter SDK",
+      alternateName: "Bugporter SDK",
       operatingSystem: "All modern browsers",
       applicationCategory: "DeveloperApplication",
       offers: {

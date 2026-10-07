@@ -59,7 +59,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      title="Sign In to Bug Reporter"
+      title="Sign In to Bug Porter"
       subtitle="Enter your account to access your projects and reports"
     >
       <div className="space-y-4">

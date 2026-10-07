@@ -9,7 +9,7 @@ export const metadata = {
     canonical: "https://bugporter.in/docs",
   },
   openGraph: {
-    title: "Documentation & Integration Guide — Bug Reporter",
+    title: "Documentation & Integration Guide — Bug Porter",
     description:
       "Complete guide on installing the SDK, Content Security Policy (CSP) setup, DOM privacy masking, and API reference.",
     url: "https://bugporter.in/docs",
@@ -26,7 +26,7 @@ export default function DocsPage() {
             <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
               <Bug className="h-4 w-4" />
             </div>
-            <span>Bug Reporter</span>
+            <span>Bug Porter</span>
           </Link>
           <span className="text-xs text-slate-500">/ Docs</span>
         </div>
@@ -43,7 +43,7 @@ export default function DocsPage() {
             Documentation & Integration Guide
           </h1>
           <p className="mt-3 text-slate-400 text-sm leading-relaxed">
-            Learn how to install the lightweight Bug Reporter SDK, configure Content Security Policies (CSP), enforce client-side privacy masking, and integrate notifications.
+            Learn how to install the lightweight Bug Porter SDK, configure Content Security Policies (CSP), enforce client-side privacy masking, and integrate notifications.
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export default function DocsPage() {
             Add the script tag to your website&apos;s HTML. The SDK weighs less than 20 KB and initializes silently without affecting host page runtime or performance.
           </p>
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 font-mono text-xs text-indigo-300 overflow-x-auto">
-            <code>&lt;script async src=&quot;https://cdn.bugreporter.dev/widget.js&quot; data-key=&quot;pk_your_project_key&quot;&gt;&lt;/script&gt;</code>
+            <code>&lt;script async src=&quot;https://bugporter.in/widget.js&quot; data-key=&quot;pk_your_project_key&quot;&gt;&lt;/script&gt;</code>
           </div>
         </section>
 

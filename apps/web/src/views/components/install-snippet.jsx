@@ -17,7 +17,7 @@ export function InstallSnippet({ apiKey = "pk_your_project_key", endpoint }) {
   const apiEndpoint = endpoint || `${origin}/api/v1`;
   const widgetScriptUrl = `${origin}/widget.js`;
 
-  const scriptSnippet = `<!-- Bug Reporter Widget -->
+  const scriptSnippet = `<!-- Bug Porter Widget -->
 <script
   async
   src="${widgetScriptUrl}"
